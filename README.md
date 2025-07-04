@@ -94,7 +94,7 @@ npm test
 
 📧 Issues: [GitHub Issues](https://github.com/github/github-mcp-server/issues)
 
-📖 Documentation: [Check the /docs folder for detailed API documentation](https://docs.anthropic.com/en/docs/mcp)
+📖 Documentation: [https://modelcontextprotocol.io/docs/concepts/architecture](https://modelcontextprotocol.io/docs/concepts/architecture)
 
 💬 Discussions: [GitHub Discussions](https://github.com/orgs/modelcontextprotocol/discussions)
 
