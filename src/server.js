@@ -1,131 +1,98 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-require('dotenv').config();
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { 
+  CallToolRequestSchema, 
+  ListToolsRequestSchema, 
+  ListResourcesRequestSchema, 
+  ReadResourceRequestSchema 
+} from '@modelcontextprotocol/sdk/types.js';
 
-const toolsHandler = require('./handlers/tools');
-const resourcesHandler = require('./handlers/resources');
+import toolsHandler from './handlers/tools.js';
+import resourcesHandler from './handlers/resources.js';
 
-class MCPServer {
-  constructor() {
-    this.app = express();
-    this.setupMiddleware();
-    this.setupRoutes();
-  }
+const createServer = () => {
+  const server = new Server(
+    {
+      name: "real-mcp-server",
+      version: "1.0.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+        resources: {},
+      },
+    }
+  );
 
-  setupMiddleware() {
-    this.app.use(helmet());
-    this.app.use(cors());
-    this.app.use(express.json({ limit: '10mb' }));
-    this.app.use(express.urlencoded({ extended: true }));
-  }
+  // Health check method (MCP doesn't use HTTP, but keeping for compatibility)
+  const getHealth = () => {
+    return {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    };
+  };
 
-  setupRoutes() {
-    // Health check endpoint
-    this.app.get('/health', (req, res) => {
-      res.json({ 
-        status: 'healthy', 
-        timestamp: new Date().toISOString(),
-        version: '1.0.0'
-      });
-    });
+  // MCP info method
+  const getMcpInfo = () => {
+    return {
+      name: 'real-mcp-server',
+      version: '1.0.0',
+      capabilities: ['tools', 'resources'],
+      description: 'Real Model Context Protocol Server'
+    };
+  };
 
-    // MCP info endpoint
-    this.app.get('/mcp/info', (req, res) => {
-      res.json({
-        name: 'mcp-server',
-        version: '1.0.0',
-        capabilities: ['tools', 'resources']
-      });
-    });
-
-    // Tools endpoints
-    this.app.get('/tools/list', async (req, res) => {
-      try {
-        const result = await toolsHandler.listTools();
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    });
-
-    this.app.post('/tools/call', async (req, res) => {
-      try {
-        const result = await toolsHandler.callTool(req.body);
-        res.json(result);
-      } catch (error) {
-        res.status(400).json({ error: error.message });
-      }
-    });
-
-    // Resources endpoints
-    this.app.get('/resources/list', async (req, res) => {
-      try {
-        const result = await resourcesHandler.listResources();
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
-    });
-
-    this.app.post('/resources/read', async (req, res) => {
-      try {
-        const result = await resourcesHandler.readResource(req.body);
-        res.json(result);
-      } catch (error) {
-        res.status(400).json({ error: error.message });
-      }
-    });
-
-    // Error handling middleware
-    this.app.use((err, req, res, next) => {
-      console.error('Error:', err);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
-      });
-    });
-
-    // 404 handler
-    this.app.use('*', (req, res) => {
-      res.status(404).json({ error: 'Route not found' });
-    });
-  }
-
-  async start(port = process.env.PORT || 8000) {
+  // Tools handlers
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
     try {
-      this.httpServer = this.app.listen(port, () => {
-        console.log(`MCP Server running on port ${port}`);
-        console.log(`Health check: http://0.0.0.0:${port}/health`);
-      });
-
-      return this.httpServer;
+      const result = await toolsHandler.listTools();
+      return result;
     } catch (error) {
-      console.error('Failed to start server:', error);
-      process.exit(1);
+      throw new Error(`Failed to list tools: ${error.message}`);
     }
-  }
-
-  async stop() {
-    if (this.httpServer) {
-      return new Promise((resolve) => {
-        this.httpServer.close(resolve);
-      });
-    }
-  }
-}
-
-// Create and start server if this file is run directly
-if (require.main === module) {
-  const server = new MCPServer();
-  server.start();
-
-  // Graceful shutdown
-  process.on('SIGINT', async () => {
-    console.log('\nShutting down gracefully...');
-    await server.stop();
-    process.exit(0);
   });
-}
 
-module.exports = MCPServer;
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    try {
+      const result = await toolsHandler.callTool(request.params);
+      return result;
+    } catch (error) {
+      throw new Error(`Tool execution failed: ${error.message}`);
+    }
+  });
+
+  // Resources handlers
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    try {
+      const result = await resourcesHandler.listResources();
+      return result;
+    } catch (error) {
+      throw new Error(`Failed to list resources: ${error.message}`);
+    }
+  });
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    try {
+      const result = await resourcesHandler.readResource(request.params);
+      return result;
+    } catch (error) {
+      throw new Error(`Failed to read resource: ${error.message}`);
+    }
+  });
+
+  return {
+    server,
+    getHealth,
+    getMcpInfo,
+    async run() {
+      const transport = new StdioServerTransport();
+      await server.connect(transport);
+      
+      // Keep the process running
+      process.stdin.resume();
+    }
+  };
+};
+
+export default createServer;

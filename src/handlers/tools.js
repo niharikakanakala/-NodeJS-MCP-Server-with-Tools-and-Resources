@@ -1,45 +1,6 @@
-const dataService = require('../services/dataService');
-const { validateToolCall } = require('../utils/validation');
+import dataService from '../services/dataService.js';
 
 const AVAILABLE_TOOLS = [
-  {
-    name: 'get_data',
-    description: 'Retrieve data from the data service',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          description: 'The ID of the data to retrieve'
-        },
-        type: {
-          type: 'string',
-          enum: ['user', 'product', 'order'],
-          description: 'The type of data to retrieve'
-        }
-      },
-      required: ['id', 'type']
-    }
-  },
-  {
-    name: 'create_data',
-    description: 'Create new data in the data service',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        type: {
-          type: 'string',
-          enum: ['user', 'product', 'order'],
-          description: 'The type of data to create'
-        },
-        data: {
-          type: 'object',
-          description: 'The data to create'
-        }
-      },
-      required: ['type', 'data']
-    }
-  },
   {
     name: 'calculate',
     description: 'Perform mathematical calculations',
@@ -62,86 +23,71 @@ const AVAILABLE_TOOLS = [
       },
       required: ['operation', 'a', 'b']
     }
+  },
+  {
+    name: 'manage_data',
+    description: 'Manage user and product data',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['create', 'read', 'update', 'delete', 'list'],
+          description: 'The action to perform'
+        },
+        type: {
+          type: 'string',
+          enum: ['user', 'product'],
+          description: 'The type of data'
+        },
+        id: {
+          type: 'string',
+          description: 'ID for read/update/delete operations'
+        },
+        data: {
+          type: 'object',
+          description: 'Data for create/update operations'
+        }
+      },
+      required: ['action', 'type']
+    }
   }
 ];
 
 class ToolsHandler {
   async listTools() {
-    try {
-      return {
-        tools: AVAILABLE_TOOLS
-      };
-    } catch (error) {
-      throw new Error(`Failed to list tools: ${error.message}`);
-    }
+    return {
+      tools: AVAILABLE_TOOLS
+    };
   }
 
   async callTool(request) {
-    try {
-      const { name, arguments: args } = request;
+    const { name, arguments: args } = request;
 
-      // Validate tool call
-      const validation = validateToolCall(name, args);
-      if (!validation.isValid) {
-        throw new Error(validation.error);
-      }
-
-      // Find the tool
-      const tool = AVAILABLE_TOOLS.find(t => t.name === name);
-      if (!tool) {
-        throw new Error(`Tool "${name}" not found`);
-      }
-
-      // Execute the tool
-      let result;
-      switch (name) {
-        case 'get_data':
-          result = await this.handleGetData(args);
-          break;
-        case 'create_data':
-          result = await this.handleCreateData(args);
-          break;
-        case 'calculate':
-          result = await this.handleCalculate(args);
-          break;
-        default:
-          throw new Error(`Tool "${name}" not implemented`);
-      }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(result, null, 2)
-          }
-        ]
-      };
-    } catch (error) {
-      throw new Error(`Tool execution failed: ${error.message}`);
+    switch (name) {
+      case 'calculate':
+        return this.handleCalculate(args);
+      case 'manage_data':
+        return this.handleDataManagement(args);
+      default:
+        throw new Error(`Unknown tool: ${name}`);
     }
   }
 
-  async handleGetData(args) {
-    const { id, type } = args;
-    const data = await dataService.getData(id, type);
-    
-    if (!data) {
-      return { error: `${type} with id ${id} not found` };
-    }
-    
-    return { success: true, data };
-  }
-
-  async handleCreateData(args) {
-    const { type, data } = args;
-    const result = await dataService.createData(type, data);
-    return { success: true, id: result.id, data: result };
-  }
-
-  async handleCalculate(args) {
+  handleCalculate(args) {
     const { operation, a, b } = args;
-    
+
+    // Validate inputs
+    if (!operation || !['add', 'subtract', 'multiply', 'divide'].includes(operation)) {
+      throw new Error('Invalid operation. Must be add, subtract, multiply, or divide');
+    }
+
+    if (typeof a !== 'number' || typeof b !== 'number') {
+      throw new Error('Both a and b must be numbers');
+    }
+
     let result;
+    
     switch (operation) {
       case 'add':
         result = a + b;
@@ -158,16 +104,107 @@ class ToolsHandler {
         }
         result = a / b;
         break;
-      default:
-        throw new Error(`Unknown operation: ${operation}`);
     }
-    
-    return { 
-      operation, 
-      operands: { a, b }, 
-      result 
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            operation,
+            operands: { a, b },
+            result,
+            timestamp: new Date().toISOString()
+          }, null, 2)
+        }
+      ]
     };
+  }
+
+  handleDataManagement(args) {
+    const { action, type, id, data } = args;
+
+    // Validate inputs
+    if (!action || !['create', 'read', 'update', 'delete', 'list'].includes(action)) {
+      throw new Error('Invalid action. Must be create, read, update, delete, or list');
+    }
+
+    if (!type || !['user', 'product'].includes(type)) {
+      throw new Error('Invalid type. Must be user or product');
+    }
+
+    let result;
+
+    try {
+      switch (action) {
+        case 'create':
+          if (!data) {
+            throw new Error('Data is required for create action');
+          }
+          result = dataService.create(type, data);
+          break;
+
+        case 'read':
+          if (!id) {
+            throw new Error('ID is required for read action');
+          }
+          result = dataService.read(type, id);
+          if (!result) {
+            throw new Error(`${type} with id ${id} not found`);
+          }
+          break;
+
+        case 'update':
+          if (!id || !data) {
+            throw new Error('ID and data are required for update action');
+          }
+          result = dataService.update(type, id, data);
+          break;
+
+        case 'delete':
+          if (!id) {
+            throw new Error('ID is required for delete action');
+          }
+          result = dataService.delete(type, id);
+          break;
+
+        case 'list':
+          result = dataService.list(type);
+          break;
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              action,
+              type,
+              success: true,
+              data: result,
+              timestamp: new Date().toISOString()
+            }, null, 2)
+          }
+        ]
+      };
+
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              action,
+              type,
+              success: false,
+              error: error.message,
+              timestamp: new Date().toISOString()
+            }, null, 2)
+          }
+        ]
+      };
+    }
   }
 }
 
-module.exports = new ToolsHandler();
+export default new ToolsHandler();

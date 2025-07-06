@@ -2,8 +2,10 @@
   "name": "backend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+
   "scripts": {
-    "start": "nodemon src/server.js",
+    "start": "nodemon index.js",
     "test": "node tests/main.test.js",
     "sample_tests": "jest --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\" -- sample.test.js",
     "main_tests": "jest --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\" -- main.test.js"
