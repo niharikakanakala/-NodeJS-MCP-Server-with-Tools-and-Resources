@@ -1,3 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="1.023">
+<testsuites name="jest tests" tests="10" failures="3" errors="0" time="1.185">
+  <testsuite name="tests/main.test.js" errors="0" failures="3" skipped="0" timestamp="2025-07-06T23:38:38" time="1.144" tests="10">
+    <testcase classname="MCP Server Test Suite" name="should create server with correct configuration" time="0.103">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should return correct health status" time="0.092">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should return correct MCP info" time="0.091">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should list users from data service" time="0.072">
+      <failure>Error: expect(received).toHaveLength(expected)
+
+Matcher error: received value must have a length property whose value must be a number
+
+Received has value: undefined
+    at Object.&lt;anonymous&gt; (/home/hackerearth348/Documents/MCP (2)/backend/tests/main.test.js:267:25)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)</failure>
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should create new user" time="0.068">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+Expected: ObjectContaining {&quot;email&quot;: &quot;test@example.com&quot;, &quot;id&quot;: Any&lt;String&gt;, &quot;name&quot;: &quot;Test User&quot;, &quot;status&quot;: &quot;active&quot;}
+Received: undefined
+    at Object.&lt;anonymous&gt; (/home/hackerearth348/Documents/MCP (2)/backend/tests/main.test.js:289:25)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)</failure>
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should list available tools" time="0.069">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should perform addition calculation" time="0.073">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should throw error for division by zero" time="0.07">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should list available resources" time="0.07">
+    </testcase>
+    <testcase classname="MCP Server Test Suite" name="should read users resource" time="0.076">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+    at Object.&lt;anonymous&gt; (/home/hackerearth348/Documents/MCP (2)/backend/tests/main.test.js:353:28)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)</failure>
+    </testcase>
+  </testsuite>
 </testsuites>

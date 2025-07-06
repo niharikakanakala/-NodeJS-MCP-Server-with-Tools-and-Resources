@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-
   "scripts": {
     "start": "nodemon index.js",
-    "test": "node tests/main.test.js",
-    "sample_tests": "jest --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\" -- sample.test.js",
-    "main_tests": "jest --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\" -- main.test.js"
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:coverage": "jest --config jest.config.cjs --coverage",
+    "sample_tests": "jest --config jest.config.cjs --testNamePattern='sample' --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\"",
+    "main_tests": "jest --config jest.config.cjs tests/main.test.js --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.4.0",
