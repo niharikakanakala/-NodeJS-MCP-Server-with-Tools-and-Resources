@@ -4,10 +4,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const mcpServer = createServer();
-const port = process.env.PORT || 8000;
 
 // Note: This is a Real MCP Server - it doesn't use HTTP like a regular web server
-// MCP servers communicate via stdio/JSON-RPC, but we're keeping this format for familiarity
+
 
 async function startServer() {
   try {
@@ -16,10 +15,8 @@ async function startServer() {
     console.log(`📖 To use: Connect this server to MCP-enabled AI applications`);
     console.log(`⚡ Starting MCP server...`);
     
-    // Start the actual MCP server (stdio communication)
     await mcpServer.run();
     
-    // The server is now running and waiting for MCP connections
     console.log(`✅ MCP Server is running and ready for connections`);
     console.log(`🤖 Connect this to Claude Desktop or other MCP clients`);
     

@@ -37,13 +37,11 @@ class ResourcesHandler {
   async readResource(request) {
     const { uri } = request;
 
-    // Find the resource
     const resource = AVAILABLE_RESOURCES.find(r => r.uri === uri);
     if (!resource) {
       throw new Error(`Resource "${uri}" not found`);
     }
 
-    // Read the resource content
     let content;
     switch (uri) {
       case 'users://all':

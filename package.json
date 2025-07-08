@@ -8,7 +8,7 @@
     "test": "jest --config jest.config.cjs",
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:coverage": "jest --config jest.config.cjs --coverage",
-    "sample_tests": "jest --config jest.config.cjs --testNamePattern='sample' --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\"",
+    "sample_tests": "jest --config jest.config.cjs tests/sample.test.js --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\"",
     "main_tests": "jest --config jest.config.cjs tests/main.test.js --forceExit --testTimeout=10000 --verbose --ci --testResultsProcessor=\"jest-junit\""
   },
   "dependencies": {

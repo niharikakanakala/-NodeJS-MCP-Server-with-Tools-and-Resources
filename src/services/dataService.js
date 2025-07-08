@@ -11,21 +11,18 @@ class DataService {
   }
 
   initializeSampleData() {
-    // Sample users
     const users = [
       { id: '1', name: 'John Doe', email: 'john@example.com', status: 'active' },
       { id: '2', name: 'Jane Smith', email: 'jane@example.com', status: 'active' },
       { id: '3', name: 'Bob Johnson', email: 'bob@example.com', status: 'inactive' }
     ];
 
-    // Sample products
     const products = [
       { id: '1', name: 'Laptop', price: 999.99, category: 'Electronics', stock: 50 },
       { id: '2', name: 'Mouse', price: 29.99, category: 'Electronics', stock: 200 },
       { id: '3', name: 'Keyboard', price: 79.99, category: 'Electronics', stock: 150 }
     ];
 
-    // Store sample data
     users.forEach(user => {
       this.data.user.set(user.id, { ...user, createdAt: new Date() });
     });

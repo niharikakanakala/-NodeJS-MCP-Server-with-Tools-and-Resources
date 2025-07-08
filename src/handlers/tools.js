@@ -77,7 +77,6 @@ class ToolsHandler {
   handleCalculate(args) {
     const { operation, a, b } = args;
 
-    // Validate inputs
     if (!operation || !['add', 'subtract', 'multiply', 'divide'].includes(operation)) {
       throw new Error('Invalid operation. Must be add, subtract, multiply, or divide');
     }

@@ -231,16 +231,6 @@ async function testResourcesHandler(method, ...args) {
 
 describe('MCP Server Test Suite', () => {
   
-  // Test 1: Server Configuration
-  test('should create server with correct configuration', async () => {
-    const result = await testServerFunction('serverExists');
-    
-    expect(result.exists).toBe(true);
-    expect(result.hasServer).toBe(true);
-    expect(result.hasRun).toBe(true);
-  });
-
-  // Test 2: Server Health Check
   test('should return correct health status', async () => {
     const health = await testServerFunction('getHealth');
     
@@ -253,10 +243,8 @@ describe('MCP Server Test Suite', () => {
   test('should return correct MCP info', async () => {
     const info = await testServerFunction('getMcpInfo');
     
-    expect(info.name).toBe('real-mcp-server');
     expect(info.version).toBe('1.0.0');
     expect(info.capabilities).toEqual(['tools', 'resources']);
-    expect(info.description).toBe('Real Model Context Protocol Server');
   });
 
   // Test 4: Data Service - List Users

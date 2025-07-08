@@ -36,10 +36,8 @@ const createServer = () => {
   // MCP info method
   const getMcpInfo = () => {
     return {
-      name: 'real-mcp-server',
       version: '1.0.0',
-      capabilities: ['tools', 'resources'],
-      description: 'Real Model Context Protocol Server'
+      capabilities: ['tools', 'resources']
     };
   };
 
